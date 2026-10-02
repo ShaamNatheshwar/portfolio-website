@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,6 +34,10 @@
 
   *{ box-sizing:border-box; }
   html, body { background: var(--bg); color: var(--ink); }
+  html{ scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+  }
   body{
     font-family: 'Inter', system-ui, sans-serif;
     margin:0; padding:0;
@@ -55,6 +59,11 @@
     transition: width .3s ease, height .3s ease;
   }
   .cursor-glow.is-hover{ width: 80px; height: 80px; }
+  /* On touch devices mousemove never fires, so the glow would otherwise sit
+     frozen in the middle of the screen as a stray blob — hide it there */
+  @media (hover: none), (pointer: coarse){
+    .cursor-glow{ display: none; }
+  }
 
   /* Three.js canvas */
   #scene-canvas{ position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display:block; }
@@ -140,21 +149,12 @@
     -webkit-mask-composite: xor; mask-composite: exclude;
     transition: background .5s ease; pointer-events:none;
   }
-  .project-card:hover{
-    transform: translateY(-6px) scale(1.015);
-    border-color: rgba(77,168,255,0.45);
-    background: linear-gradient(180deg, rgba(77,168,255,0.06), rgba(122,92,255,0.02));
-  }
-  .project-card:hover::before{
-    background: linear-gradient(135deg, rgba(77,168,255,0.8), rgba(122,92,255,0.4));
-  }
   .project-card .glow{
     position:absolute; right:-40%; top:-40%;
     width: 400px; height: 400px;
     background: radial-gradient(circle, rgba(77,168,255,0.35) 0%, transparent 60%);
     filter: blur(40px); opacity:0; transition: opacity .7s ease; pointer-events:none;
   }
-  .project-card:hover .glow{ opacity: 1; }
 
   .tag{
     display:inline-block; font-size:11px; letter-spacing:.18em; text-transform:uppercase;
@@ -162,7 +162,21 @@
     padding: 6px 10px; border:1px solid rgba(255,255,255,0.1); border-radius: 999px;
     transition: color .3s ease, border-color .3s ease;
   }
-  .project-card:hover .tag{ color: var(--ink); border-color: rgba(255,255,255,0.3); }
+
+  /* Hover-only effects: gated behind (hover:hover) so touch/tap devices don't get
+     stuck in a permanent "hover" state after a tap (common mobile Safari/Chrome quirk) */
+  @media (hover: hover) and (pointer: fine){
+    .project-card:hover{
+      transform: translateY(-6px) scale(1.015);
+      border-color: rgba(77,168,255,0.45);
+      background: linear-gradient(180deg, rgba(77,168,255,0.06), rgba(122,92,255,0.02));
+    }
+    .project-card:hover::before{
+      background: linear-gradient(135deg, rgba(77,168,255,0.8), rgba(122,92,255,0.4));
+    }
+    .project-card:hover .glow{ opacity: 1; }
+    .project-card:hover .tag{ color: var(--ink); border-color: rgba(255,255,255,0.3); }
+  }
 
   /* Nav */
   nav.top{
@@ -181,8 +195,10 @@
     content:""; position:absolute; left:0; bottom:0; height:1px; width:0; background: var(--ink);
     transition: width .4s cubic-bezier(.2,.7,.1,1);
   }
-  .nav-link:hover{ color: var(--ink); }
-  .nav-link:hover::after{ width: 100%; }
+  @media (hover: hover) and (pointer: fine){
+    .nav-link:hover{ color: var(--ink); }
+    .nav-link:hover::after{ width: 100%; }
+  }
 
   /* Skill chip */
   .chip{
@@ -195,8 +211,10 @@
     font-size: 13px; letter-spacing:.04em;
     transition: transform .3s ease, border-color .3s ease, background .3s ease;
   }
-  .chip:hover{ transform: translateY(-2px); border-color: rgba(77,168,255,0.5); background: rgba(77,168,255,0.06); }
   .chip .dot{ width:6px; height:6px; border-radius: 999px; background: var(--electric); box-shadow: 0 0 12px var(--electric); }
+  @media (hover: hover) and (pointer: fine){
+    .chip:hover{ transform: translateY(-2px); border-color: rgba(77,168,255,0.5); background: rgba(77,168,255,0.06); }
+  }
 
   /* Magnetic button */
   .magnetic{
@@ -214,8 +232,10 @@
     transform: translateY(101%);
     transition: transform .5s cubic-bezier(.2,.7,.1,1);
   }
-  .magnetic:hover{ border-color: rgba(77,168,255,0.6); }
-  .magnetic:hover::before{ transform: translateY(0); }
+  @media (hover: hover) and (pointer: fine){
+    .magnetic:hover{ border-color: rgba(77,168,255,0.6); }
+    .magnetic:hover::before{ transform: translateY(0); }
+  }
 
   /* Terminal-style card for experience */
   .terminal{
@@ -262,10 +282,12 @@
     background: rgba(255,255,255,0.02);
     transition: border-color .3s ease, transform .3s ease, background .3s ease;
   }
-  .cert-card:hover{
-    border-color: rgba(122,92,255,0.5);
-    background: rgba(122,92,255,0.04);
-    transform: translateY(-4px);
+  @media (hover: hover) and (pointer: fine){
+    .cert-card:hover{
+      border-color: rgba(122,92,255,0.5);
+      background: rgba(122,92,255,0.04);
+      transform: translateY(-4px);
+    }
   }
   .cert-badge{
     width: 44px; height: 44px; border-radius: 10px;
@@ -284,15 +306,23 @@
   }
   .hero-sub{ font-size: clamp(14px, 1.4vw, 18px); color: var(--ink-dim); letter-spacing: .2em; text-transform: uppercase; }
 
+  /* The 56px floor in .hero-title's clamp() is wider than the "Shaamnatheshwar"
+     word on very small phones, so overflow-x:hidden was silently clipping it.
+     Scale the floor down just for narrow viewports — size only, same look/colors. */
+  @media (max-width: 420px){
+    .hero-title{ font-size: clamp(28px, 11vw, 200px); }
+  }
+
   .marquee{
-    display: flex; gap: 3rem; white-space: nowrap;
+    display: flex; gap: 0; white-space: nowrap;
+    width: max-content; /* FIX: -50% must be half the CONTENT width, not the viewport width, or the loop jumps */
     animation: scrollX 40s linear infinite;
   }
   @keyframes scrollX{
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
   }
-  .marquee span{ color: var(--ink-dim); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; }
+  .marquee span{ margin-right: 3rem; /* FIX: spacing via margin so both halves are identical = seamless loop */ color: var(--ink-dim); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; }
 
   .live-dot{
     width: 8px; height: 8px; border-radius: 999px; background: var(--green);
@@ -303,6 +333,82 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50%      { opacity: .5; transform: scale(.85); }
   }
+
+  /* ===================== BUG-FIX LAYER (no visual redesign) ===================== */
+  /* Prevent sideways scrolling on iOS (body-only overflow-x is ignored there) */
+  html{ overflow-x: hidden; }
+  @supports (overflow-x: clip){ html, body{ overflow-x: clip; } }
+
+  /* Hero: 100vh on phones includes the hidden address-bar area -> content pushed off-screen */
+  @supports (min-height: 100svh){ #hero.min-h-screen{ min-height: 100svh; } }
+
+  /* Grain layer is translated by a few px -> bare strips appeared at the screen edges */
+  .grain{ inset: -8px; }
+
+  /* Hero title: background-clip:text on the <h1> does NOT paint children that are
+     transformed/composited (each split .ch is), so the name rendered invisible / glitchy
+     in Safari & some Chrome builds. Paint the same gradient on each glyph instead,
+     split per line so the overall top-to-bottom fade matches the original. */
+  .hero-title .ch{
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    background-image: linear-gradient(180deg, #FFFFFF 0%, #C4C4D2 100%);
+    padding-bottom: .04em; /* stop descender/clip cut-off on the glyph box */
+  }
+  html:not(.no-js) .hero-title{ background-image: none; } /* glyphs carry the gradient now */
+  .hero-title .ch.l2{ background-image: linear-gradient(180deg, #C4C4D2 0%, #B8B8C8 20%, #5A5A6E 100%); }
+
+  /* Drop will-change once revealed (hundreds of layers = memory/jank on phones) */
+  .reveal.in .ch{ will-change: auto; }
+
+  /* Cards that also use .blur-in lost the fade/blur transition because their own
+     `transition` rule overrode it -> they popped in. Merge both transitions. */
+  .project-card.blur-in{
+    transition: transform .5s cubic-bezier(.2,.7,.1,1), border-color .5s ease, background .5s ease,
+                opacity 1.4s ease, filter 1.4s ease;
+  }
+  .cert-card.blur-in{
+    transition: border-color .3s ease, transform .3s ease, background .3s ease,
+                opacity 1.4s ease, filter 1.4s ease;
+  }
+
+  /* Long terminal file names overflowed the title bar on phones */
+  .terminal .bar .dot{ flex-shrink: 0; }
+  .terminal .bar .title{ min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Skill chips: dot was getting squashed and long words overflowed in 2-col mobile grid */
+  .chip{ min-width: 0; overflow-wrap: anywhere; }
+  .chip .dot{ flex-shrink: 0; }
+
+  /* Long words in body copy / tags can't push the layout wider than the screen */
+  .project-card, .terminal .body, .cert-card{ min-width: 0; overflow-wrap: break-word; }
+
+  /* Scroll hint was fixed on screen for the whole page, sitting on top of content/buttons */
+  .scroll-hint{ transition: opacity .5s ease; }
+  .scroll-hint.is-hidden{ opacity: 0; pointer-events: none; }
+
+  /* Nav: logo + "Open to opportunities" pill overflowed / wrapped on phones */
+  nav.top{ gap: 12px; }
+  nav.top > a:first-child{ white-space: nowrap; flex-shrink: 0; }
+  nav.top .magnetic{ white-space: nowrap; flex-shrink: 1; min-width: 0; }
+  @media (max-width: 480px){
+    nav.top{ padding-top: 14px; padding-bottom: 14px; }
+    nav.top > a:first-child{ font-size: 16px; }
+    nav.top .magnetic{ padding: 10px 14px; gap: 8px; font-size: 10px; letter-spacing: .08em; }
+  }
+  @media (max-width: 380px){
+    nav.top > a:first-child{ font-size: 15px; }
+    nav.top .magnetic{ padding: 9px 12px; gap: 6px; font-size: 9px; letter-spacing: .04em; }
+  }
+  @media (max-width: 340px){
+    nav.top > a:first-child span:last-child{ display: none; } /* hide "/devops" suffix only on tiny screens */
+  }
+
+  /* Anchor jumps shouldn't land under the fixed nav */
+  section[id]{ scroll-margin-top: 70px; }
+
+  /* Fallback: if JS / CDN fails, never leave content invisible */
+  .no-js .blur-in{ filter: none; opacity: 1; transform: none; }
 </style>
 </head>
 <body>
@@ -349,7 +455,7 @@
           production Kubernetes platforms.
         </p>
       </div>
-      <div class="col-span-12 md:col-span-5 flex md:justify-end items-end gap-4">
+      <div class="col-span-12 md:col-span-5 flex flex-wrap md:justify-end items-end gap-4">
         <a href="#work" class="magnetic text-sm">
           <span>View Projects</span>
           <span>→</span>
@@ -827,6 +933,39 @@
 </section>
 
 <script>
+/* JS is running -> let the normal reveal animations take over */
+document.documentElement.classList.remove('no-js');
+const IS_FINE_POINTER = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+/* ---------- CUSTOM CURSOR (moved out of the WebGL loop so it still works
+   if WebGL is unavailable, and doesn't run at all on touch devices) ---------- */
+(() => {
+  const cursorEl = document.getElementById('cursorGlow');
+  if (!cursorEl) return;
+  if (!IS_FINE_POINTER) { cursorEl.style.display = 'none'; return; }
+  let x = -100, y = -100, raf = null;
+  const paint = () => { raf = null; cursorEl.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`; };
+  paint(); // start off-screen instead of a stray blob in the top-left corner
+  window.addEventListener('mousemove', (e) => {
+    x = e.clientX; y = e.clientY;
+    if (!raf) raf = requestAnimationFrame(paint);
+  }, { passive: true });
+  document.addEventListener('mouseleave', () => { x = -100; y = -100; if (!raf) raf = requestAnimationFrame(paint); });
+  document.querySelectorAll('a, button, .magnetic, .project-card, .chip, .cert-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursorEl.classList.add('is-hover'));
+    el.addEventListener('mouseleave', () => cursorEl.classList.remove('is-hover'));
+  });
+})();
+
+/* ---------- SCROLL HINT: fade out once the user starts scrolling ---------- */
+(() => {
+  const hint = document.querySelector('.scroll-hint');
+  if (!hint) return;
+  const update = () => hint.classList.toggle('is-hidden', window.scrollY > 40);
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+})();
+
 /* ===================================================================
    THREE.JS — Generative Particle Constellation + Ribbon Network
    ===================================================================
@@ -843,11 +982,20 @@
 =================================================================== */
 
 (() => {
+ try {
+  if (typeof THREE === 'undefined') throw new Error('three.js failed to load');
   const canvas = document.getElementById('scene-canvas');
   const renderer = new THREE.WebGLRenderer({
     canvas, antialias: true, alpha: true, powerPreference: 'high-performance'
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  // Lower-powered/mobile devices choke on 5,000 particles + 880 line segments
+  // recalculated every frame at full pixel density — scale quality down for them
+  // so the scene stays smooth instead of janking/overheating on phones.
+  const isLowPower = window.matchMedia('(max-width: 768px)').matches ||
+                      (('ontouchstart' in window) && window.innerWidth < 1024);
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isLowPower ? 1.5 : 2));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.setClearColor(0x000000, 0);
 
@@ -856,7 +1004,7 @@
   camera.position.z = 400;
 
   /* ------------------- PARTICLE FIELD ------------------- */
-  const PARTICLE_COUNT = 5000;
+  const PARTICLE_COUNT = isLowPower ? 1800 : 5000;
   const positions      = new Float32Array(PARTICLE_COUNT * 3);
   const homePositions  = new Float32Array(PARTICLE_COUNT * 3);
   const colors         = new Float32Array(PARTICLE_COUNT * 3);
@@ -929,7 +1077,7 @@
   scene.add(particles);
 
   /* ------------------- RIBBON / LINE NET ------------------- */
-  const ANCHORS = 220;
+  const ANCHORS = isLowPower ? 90 : 220;
   const PARTNERS_PER_ANCHOR = 4;
   const linePositions = new Float32Array(ANCHORS * PARTNERS_PER_ANCHOR * 2 * 3);
   const lineGeometry  = new THREE.BufferGeometry();
@@ -963,35 +1111,31 @@
   }, { passive: true });
 
   let scrollProgress = 0;
-  window.addEventListener('scroll', () => {
+  const updateScroll = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
-    scrollProgress = max > 0 ? window.scrollY / max : 0;
-  }, { passive: true });
+    scrollProgress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+  };
+  updateScroll(); // page can load already scrolled (refresh / back button)
+  window.addEventListener('scroll', updateScroll, { passive: true });
+  window.addEventListener('load', updateScroll);
 
-  /* ------------------- CUSTOM CURSOR ------------------- */
-  const cursorEl = document.getElementById('cursorGlow');
-  let cursorX = window.innerWidth/2, cursorY = window.innerHeight/2;
-  window.addEventListener('mousemove', (e) => { cursorX = e.clientX; cursorY = e.clientY; });
-  document.querySelectorAll('a, button, .magnetic, .project-card, .chip, .cert-card').forEach(el => {
-    el.addEventListener('mouseenter', () => cursorEl.classList.add('is-hover'));
-    el.addEventListener('mouseleave', () => cursorEl.classList.remove('is-hover'));
-  });
 
   /* ------------------- ANIMATION LOOP ------------------- */
   const clock = new THREE.Clock();
+  let elapsed = 0;          // own timeline so pausing the tab doesn't make it jump
   let frameId = null;
+  let contextLost = false;
   const tmp = new THREE.Vector3();
   const tmpMouse = new THREE.Vector3();
   const tmpTo = new THREE.Vector3();
 
   function tick() {
-    const t  = clock.getElapsedTime();
-    clock.getDelta(); // drain (we use t instead)
+    elapsed += Math.min(clock.getDelta(), 0.1); // clamp big gaps (tab switch, lag spike)
+    const t = elapsed;
 
     mouse.x += (mouse.tx - mouse.x) * 0.06;
     mouse.y += (mouse.ty - mouse.y) * 0.06;
 
-    cursorEl.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
 
     // Scroll-driven camera + rotation — the "scroll miracle"
     const twist = scrollProgress * Math.PI * 1.4;
@@ -1051,24 +1195,33 @@
     lineGeometry.setDrawRange(0, ANCHORS * PARTNERS_PER_ANCHOR * 2);
     lineMaterial.opacity = 0.14 + Math.sin(t * 0.6) * 0.04;
 
-    renderer.render(scene, camera);
+    if (!contextLost) renderer.render(scene, camera);
     frameId = requestAnimationFrame(tick);
   }
   tick();
 
   /* ------------------- RESIZE ------------------- */
   let resizeQueued = false;
+  let lastW = window.innerWidth, lastH = window.innerHeight;
   window.addEventListener('resize', () => {
     if (resizeQueued) return;
     resizeQueued = true;
     requestAnimationFrame(() => {
       resizeQueued = false;
       const w = window.innerWidth, h = window.innerHeight;
+      // On phones the address bar showing/hiding fires resize on every scroll
+      // direction change -> canvas re-allocated + aspect jump = flicker. The canvas
+      // is CSS-sized to 100%, so small height-only changes can be safely ignored.
+      if (isLowPower && w === lastW && Math.abs(h - lastH) < 160) { updateScroll(); return; }
+      lastW = w; lastH = h;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
+      updateScroll();
     });
   });
+  canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); contextLost = true; });
+  canvas.addEventListener('webglcontextrestored', () => { contextLost = false; });
 
   /* ------------------- CLEANUP ------------------- */
   document.addEventListener('visibilitychange', () => {
@@ -1076,31 +1229,51 @@
       if (frameId) cancelAnimationFrame(frameId);
       frameId = null;
     } else if (!frameId) {
-      clock.start();
+      clock.getDelta(); // drain the hidden-tab gap instead of resetting time to 0
       tick();
     }
   });
 
   window.__scene = { scene, camera, renderer, particles, lines };
+ } catch (err) {
+  // WebGL unavailable / blocked (older phones, battery saver, CDN down).
+  // Previously this threw and killed the WHOLE script -> every .blur-in section
+  // stayed invisible. Now we just hide the canvas and the rest of the site works.
+  console.warn('[scene] 3D background disabled:', err);
+  const c = document.getElementById('scene-canvas');
+  if (c) c.style.display = 'none';
+ }
 })();
 
 
 /* ===================================================================
    GSAP / SCROLLTRIGGER — Cinematic Text & Section Transitions
 =================================================================== */
-gsap.registerPlugin(ScrollTrigger);
+const HAS_GSAP = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
+if (HAS_GSAP) {
+  gsap.registerPlugin(ScrollTrigger);
+  // Mobile browsers resize the viewport as the address bar shows/hides while
+  // scrolling; ignore those so scrub animations don't jump/jitter on phones.
+  ScrollTrigger.config({ ignoreMobileResize: true });
+}
 
-/* Split text into per-character spans with a slight skew reveal */
-function splitToChars(el) {
-  const text = el.textContent;
-  el.textContent = '';
-  el.classList.add('reveal');
-  const words = text.split(/(\s+)/);
+/* Split text into per-character spans with a slight skew reveal.
+   Walks the actual child nodes so <br> and nested styled <span>s survive. */
+function splitWordsIntoFragment(str) {
+  const frag = document.createDocumentFragment();
+  // FIX: headings used &nbsp; between words, which made them impossible to wrap,
+  // so on phones "Where I've shipped." etc. ran off the right edge and got cut.
+  // Turn them into normal spaces: identical where the line fits (desktop),
+  // wraps cleanly instead of overflowing where it doesn't (mobile).
+  str = str.replace(/\u00A0/g, ' ');
+  const words = str.split(/(\s+)/);
   for (const w of words) {
+    if (w === '') continue;
     if (/^\s+$/.test(w)) {
-      el.appendChild(document.createTextNode(w));
+      frag.appendChild(document.createTextNode(w));
     } else {
       const wspan = document.createElement('span');
+      wspan.className = 'w';
       wspan.style.display = 'inline-block';
       wspan.style.whiteSpace = 'nowrap';
       for (const ch of w) {
@@ -1109,77 +1282,173 @@ function splitToChars(el) {
         cspan.textContent = ch;
         wspan.appendChild(cspan);
       }
-      el.appendChild(wspan);
+      frag.appendChild(wspan);
     }
   }
+  return frag;
+}
+function splitNode(node) {
+  if (node.nodeType === Node.TEXT_NODE) return splitWordsIntoFragment(node.textContent);
+  if (node.nodeName === 'BR') return document.createElement('br');
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    const clone = node.cloneNode(false);
+    Array.from(node.childNodes).forEach(child => clone.appendChild(splitNode(child)));
+    return clone;
+  }
+  return document.createDocumentFragment();
+}
+function splitToChars(el) {
+  el.classList.add('reveal');
+  const originalNodes = Array.from(el.childNodes);
+  el.innerHTML = '';
+  originalNodes.forEach(node => el.appendChild(splitNode(node)));
 }
 document.querySelectorAll('[data-split]').forEach(splitToChars);
 
-/* Staggered reveal for each split headline */
-gsap.utils.toArray('.reveal').forEach((el) => {
-  const chars = el.querySelectorAll('.ch');
-  gsap.to(el, {
-    scrollTrigger: { trigger: el, start: 'top 85%', once: true },
-    onStart: () => {
-      el.classList.add('in');
-      chars.forEach((c, i) => { c.style.transitionDelay = (i * 18) + 'ms'; });
-    }
+/* Hero title: tag glyphs on line 2 so the per-glyph gradient (see CSS) keeps
+   the original top-to-bottom fade across both lines. */
+const heroTitle = document.querySelector('#hero .hero-title');
+if (heroTitle) {
+  let afterBr = false;
+  Array.from(heroTitle.childNodes).forEach(n => {
+    if (n.nodeName === 'BR') { afterBr = true; return; }
+    if (afterBr && n.nodeType === Node.ELEMENT_NODE) n.querySelectorAll('.ch').forEach(c => c.classList.add('l2'));
   });
+}
+
+/* FIX: "Shaamnatheshwar" is one unbreakable word; at the CSS vw size it was
+   wider than phone/tablet screens and got clipped. Shrink ONLY when it would
+   overflow — on screens where it already fits nothing changes. */
+function fitHeroTitle() {
+  if (!heroTitle) return;
+  heroTitle.style.fontSize = '';
+  const avail = heroTitle.clientWidth;
+  let widest = 0;
+  heroTitle.querySelectorAll('.w').forEach(w => { widest = Math.max(widest, w.offsetWidth); });
+  if (avail > 0 && widest > avail) {
+    const current = parseFloat(getComputedStyle(heroTitle).fontSize);
+    heroTitle.style.fontSize = Math.floor(current * (avail / widest) * 0.97) + 'px';
+  }
+}
+fitHeroTitle();
+let fitW = window.innerWidth;
+window.addEventListener('resize', () => {
+  if (window.innerWidth === fitW) return; // ignore mobile address-bar height changes
+  fitW = window.innerWidth;
+  fitHeroTitle();
 });
 
-/* Blur-to-focus on scroll into view */
-const blurObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('in');
-      blurObserver.unobserve(entry.target);
-    }
+/* Reveal helper used by both the GSAP path and the fallback path */
+function revealSplit(el) {
+  if (el.classList.contains('in')) return;
+  el.querySelectorAll('.ch').forEach((c, i) => { c.style.transitionDelay = (i * 18) + 'ms'; });
+  // force style flush so the delays apply before the class flips
+  void el.offsetWidth;
+  el.classList.add('in');
+}
+
+/* Blur-to-focus on scroll into view.
+   FIX: threshold 0.12 of a tall element (experience log on a phone can be
+   several screens high) could never be reached -> it stayed blurred/invisible.
+   Trigger as soon as the element's top enters the lower part of the screen. */
+if ('IntersectionObserver' in window) {
+  const blurObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        blurObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.blur-in').forEach(el => blurObserver.observe(el));
+} else {
+  document.querySelectorAll('.blur-in').forEach(el => el.classList.add('in'));
+}
+
+if (HAS_GSAP) {
+  /* Staggered reveal for each split headline */
+  gsap.utils.toArray('.reveal').forEach((el) => {
+    ScrollTrigger.create({ trigger: el, start: 'top 85%', once: true, onEnter: () => revealSplit(el) });
   });
-}, { threshold: 0.12 });
-document.querySelectorAll('.blur-in').forEach(el => blurObserver.observe(el));
 
-/* Hero parallax in lockstep with the Three.js camera zoom */
-gsap.to('#hero .hero-title', {
-  scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
-  y: -120, opacity: 0.35, letterSpacing: '-0.06em'
-});
-gsap.to('#hero .hero-sub', {
-  scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
-  y: -60, opacity: 0
-});
+  /* Hero parallax in lockstep with the Three.js camera zoom */
+  gsap.to('#hero .hero-title', {
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
+    y: -120, opacity: 0.35, letterSpacing: '-0.06em'
+  });
+  gsap.to('#hero .hero-sub', {
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
+    y: -60, opacity: 0
+  });
 
-/* Subtle section-text parallax */
-gsap.utils.toArray('section .display, section h2').forEach((el) => {
-  gsap.fromTo(el,
-    { y: 40, opacity: 0.6 },
-    { y: 0, opacity: 1,
-      scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 50%', scrub: 0.5 }
+  /* Subtle section-text parallax.
+     FIX: skip elements that also have .blur-in — GSAP's inline transform/opacity
+     fought with the CSS blur-in transition (About heading jittered / never fully faded in). */
+  gsap.utils.toArray('section .display, section h2').forEach((el) => {
+    if (el.closest('#hero')) return;
+    if (el.classList.contains('blur-in')) return;
+    gsap.fromTo(el,
+      { y: 40, opacity: 0.6 },
+      { y: 0, opacity: 1,
+        scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 50%', scrub: 0.5 }
+      }
+    );
+  });
+
+  /* Web fonts load async and shift layout after ScrollTrigger measured
+     positions -> refit the title and re-measure once fonts are ready. */
+  const refreshAll = () => { fitHeroTitle(); ScrollTrigger.refresh(); };
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshAll);
+  window.addEventListener('load', refreshAll);
+} else {
+  // GSAP CDN blocked/failed: reveal everything instead of leaving headings invisible
+  document.querySelectorAll('.reveal').forEach(revealSplit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeroTitle);
+  window.addEventListener('load', fitHeroTitle);
+}
+
+/* Magnetic button follow — mouse-only (touch taps left buttons stuck off-position). */
+if (IS_FINE_POINTER) {
+  document.querySelectorAll('.magnetic').forEach(btn => {
+    const strength = 24;
+    let raf = null, tx = 0, ty = 0, cx = 0, cy = 0;
+    function onMove(e){
+      const r = btn.getBoundingClientRect();
+      const x = e.clientX - (r.left + r.width/2);
+      const y = e.clientY - (r.top + r.height/2);
+      tx = Math.max(-strength, Math.min(strength, x * 0.25));
+      ty = Math.max(-strength, Math.min(strength, y * 0.25));
+      if (!raf) raf = requestAnimationFrame(loop);
     }
-  );
+    function loop(){
+      cx += (tx - cx) * 0.15;
+      cy += (ty - cy) * 0.15;
+      btn.style.transform = `translate(${cx}px, ${cy}px)`;
+      if (Math.abs(tx-cx) > 0.1 || Math.abs(ty-cy) > 0.1){
+        raf = requestAnimationFrame(loop);
+      } else {
+        raf = null;
+        if (tx === 0 && ty === 0) btn.style.transform = ''; // settle exactly back home
+      }
+    }
+    btn.addEventListener('mousemove', onMove);
+    btn.addEventListener('mouseleave', () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(loop); });
+  });
+}
+
+/* Placeholder "#" links don't go anywhere yet — keep them from jumping to top. */
+document.querySelectorAll('a[href="#"]').forEach(a => {
+  a.addEventListener('click', (e) => e.preventDefault());
 });
 
-/* Magnetic button follow */
-document.querySelectorAll('.magnetic').forEach(btn => {
-  const strength = 24;
-  let raf = null, tx = 0, ty = 0, cx = 0, cy = 0;
-  function onMove(e){
-    const r = btn.getBoundingClientRect();
-    const x = e.clientX - (r.left + r.width/2);
-    const y = e.clientY - (r.top + r.height/2);
-    tx = Math.max(-strength, Math.min(strength, x * 0.25));
-    ty = Math.max(-strength, Math.min(strength, y * 0.25));
-    if (!raf) raf = requestAnimationFrame(loop);
-  }
-  function loop(){
-    cx += (tx - cx) * 0.15;
-    cy += (ty - cy) * 0.15;
-    btn.style.transform = `translate(${cx}px, ${cy}px)`;
-    if (Math.abs(tx-cx) > 0.1 || Math.abs(ty-cy) > 0.1){
-      raf = requestAnimationFrame(loop);
-    } else { raf = null; }
-  }
-  btn.addEventListener('mousemove', onMove);
-  btn.addEventListener('mouseleave', () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(loop); });
+/* Safety net: if anything above ever fails, never leave the page blank. */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.blur-in:not(.in)').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('in');
+    });
+  }, 1500);
 });
 </script>
 </body>
