@@ -183,5 +183,5 @@ MIT — use it, fork it, ship it. Attribution appreciated but not required.
 Built by **Shaamnatheshwar Sasikumar** — DevOps & Cloud Engineer at Flex.
 Specializing in Linux, AWS, Kubernetes, Terraform, and modernising legacy monitoring to the Prometheus / LGTM stack.
 
-- LinkedIn: [linkedin.com/in/shaamnatheshwar](https://linkedin.com/in/shaamnatheshwar)
-- Email: shaam.devops@gmail.com
+- LinkedIn: [linkedin.com/in/shaamnatheshwar](https://www.linkedin.com/in/shaamnatheshwar-sasikumar/)
+- Email: shaamsarath7@gmail.com
